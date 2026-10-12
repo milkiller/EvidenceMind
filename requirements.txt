@@ -1,0 +1,4 @@
+pypdf>=5,<7
+sentence-transformers>=5.7,<6
+PyYAML>=6,<7
+python-dotenv>=1,<2

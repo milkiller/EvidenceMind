@@ -1,0 +1,17 @@
+# EvidenceMind 的非敏感本地配置。
+# Step Plan 专用地址和 API key 从 .env 或系统环境变量读取；不要使用普通按量 API 地址。
+
+model:
+  name: step-3.7-flash
+  api_style: chat_completions
+  api_base_env: STEPFUN_PLAN_BASE_URL
+  api_key_env: STEPFUN_PLAN_API_KEY
+  timeout_seconds: 180
+
+retrieval:
+  top_k: 3
+  min_similarity: 0.5
+
+answering:
+  max_citations: 3
+  max_evidence_chars: 2400

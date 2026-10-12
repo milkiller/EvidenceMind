@@ -1,0 +1,15 @@
+# Local API credentials
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+data/*
+!data/README.md
+*.sqlite
+*.sqlite-*
+*.db
+*.docx
+*.pdf
