@@ -170,10 +170,11 @@ def split_chars_with_overlap(
 
 
 def split_paragraphs(text: str, chunk_size: int) -> tuple[str, ...]:
-    """Group adjacent paragraphs without exceeding the character budget.
+    """Group paragraphs, counting the two-character separator in the budget.
 
-    Decide and document how to handle one paragraph longer than chunk_size.
-    Empty lines should separate paragraphs and should not become chunks.
+    Preserve a single oversized paragraph as its own chunk to keep it intact.
+    Thus chunk_size limits merging, but is not a hard limit for such paragraphs.
+    Empty lines separate paragraphs and do not become chunks.
     """
     if chunk_size <= 0:
         raise ValueError("chunk_size must be more than 0")
@@ -182,7 +183,7 @@ def split_paragraphs(text: str, chunk_size: int) -> tuple[str, ...]:
     current_chunk = ""
     for paragraph in paragraphs:
         separator_length = 2 if current_chunk else 0
-        if len(current_chunk) + len(paragraph) <= chunk_size:
+        if len(current_chunk) + separator_length + len(paragraph) <= chunk_size:
             if current_chunk:
                 current_chunk += "\n\n" + paragraph
             else:

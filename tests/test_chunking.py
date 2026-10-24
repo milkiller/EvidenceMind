@@ -85,9 +85,44 @@ class ChunkingPracticeTests(unittest.TestCase):
     def test_paragraphs_group_text_within_budget(self) -> None:
         text = "第一段。\n\n第二段。\n\n第三段更长。"
 
-        chunks = split_paragraphs(text, chunk_size=9)
+        chunks = split_paragraphs(text, chunk_size=10)
 
         self.assertEqual(chunks, ("第一段。\n\n第二段。", "第三段更长。"))
+
+    def test_paragraph_separator_counts_toward_budget(self) -> None:
+        for budget, expected in (
+            (4, ("ab", "cd", "ef")),
+            (5, ("ab", "cd", "ef")),
+            (6, ("ab\n\ncd", "ef")),
+        ):
+            with self.subTest(budget=budget):
+                chunks = split_paragraphs("ab\n\ncd\n\nef", budget)
+                self.assertEqual(chunks, expected)
+                self.assertTrue(all(len(chunk) <= budget for chunk in chunks))
+
+    def test_paragraphs_preserve_one_oversized_paragraph(self) -> None:
+        self.assertEqual(
+            split_paragraphs("ab\n\nabcdefg\n\ncd", 4),
+            ("ab", "abcdefg", "cd"),
+        )
+
+    def test_paragraph_document_keeps_metadata_after_budget_split(self) -> None:
+        document = PDFDocument(
+            path=Path("paper.pdf"),
+            filename="paper.pdf",
+            page_count=1,
+            pages=(PageText(page_number=1, text="ab\n\ncd"),),
+        )
+        chunks = chunk_document(
+            document, ChunkConfig(strategy=ChunkStrategy.PARAGRAPH, chunk_size=5)
+        )
+        self.assertEqual([chunk.text for chunk in chunks], ["ab", "cd"])
+        self.assertEqual([chunk.page_number for chunk in chunks], [1, 1])
+        self.assertEqual([chunk.position for chunk in chunks], [0, 1])
+        self.assertEqual(
+            [chunk.chunk_id for chunk in chunks],
+            ["paper.pdf-page1-pos0", "paper.pdf-page1-pos1"],
+        )
 
     # @unittest.skip("TODO: validate overlap, then remove this decorator")
     def test_overlap_must_be_smaller_than_chunk_size(self) -> None:
